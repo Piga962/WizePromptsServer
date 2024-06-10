@@ -1,9 +1,9 @@
 const {db} = require('../database/db');
 
-const getAllCategories = async() =>{
+const getAllCategoriesById = async(id) =>{
     try{
-        const query = 'SELECT * FROM categories ORDER BY id ASC;';
-        const {rows} = await db.query(query);
+        const query = 'SELECT * FROM categories WHERE user_id = $1;';
+        const {rows} = await db.query(query, [id]);
         return rows;
     } catch(error){
         console.log(error);
@@ -13,8 +13,8 @@ const getAllCategories = async() =>{
 
 const createCategory =  async (category) =>{
     try{
-        const query = 'INSERT INTO categories (name) VALUES ($1) RETURNING *;';
-        const {rows} = await db.query(query,[category.name]);
+        const query = 'INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING *;';
+        const {rows} = await db.query(query,[category.name, category.user_id]);
         return rows;
     }catch(error){
         console.log(error);
@@ -22,4 +22,4 @@ const createCategory =  async (category) =>{
     }
 }
 
-module.exports = {getAllCategories, createCategory}
+module.exports = {getAllCategoriesById, createCategory}

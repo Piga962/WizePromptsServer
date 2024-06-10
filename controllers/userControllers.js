@@ -12,7 +12,6 @@ async function getAllUsers(req,res){
 
 async function createUser(req,res){
     const user = req.body;
-    console.log(user);
     try{
         const newUser = await userModel.createUser(user);
         res.json(newUser);
