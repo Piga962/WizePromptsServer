@@ -46,4 +46,22 @@ async function logInUser(req, res){
     }
 }
 
-module.exports = {getAllUsers, createUser, logInUser};
+const loginUser = async(req, res) =>{
+    const {email, password} = req.body;
+    try{
+        const user = await userModel.loginUser(email, password);
+        if(!user){
+            return res.status(404).json({message: 'User not found'});
+        }
+        const userInfo = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+        };
+        res.json({user: userInfo});  
+    }catch(error){
+        console.log(error);
+    }
+}
+
+module.exports = {getAllUsers, createUser, logInUser, loginUser};

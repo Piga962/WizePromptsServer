@@ -6,6 +6,7 @@ const app = express();
 const port = 3001;
 
 const userRoutes = require('./routes/userRoutes');
+const conversationRoutes = require('./routes/conversationsRoutes');
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -20,3 +21,4 @@ app.listen(port, () =>{
 })
 
 app.use('/users',userRoutes);
+app.use('/conversations', conversationRoutes);

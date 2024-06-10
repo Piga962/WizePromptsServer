@@ -61,4 +61,17 @@ const checkPassword = async(inputPassword, storedPassword) =>{
     }
 }
 
-module.exports = {getAllUsers, createUser, getUserbyEmail, checkPassword};
+const loginUser = async(email, password) =>{
+    let passwordEncrypted = cesarCipher(password,3);
+    try{
+        const query = 'SELECT * FROM users WHERE email = $1 AND password = $2;';
+        const {rows} = await db.query(query,[email,passwordEncrypted]);
+        return rows[0];
+    }catch(error){
+        console.log(error);
+        return error;
+    
+    }
+}
+
+module.exports = {getAllUsers, createUser, getUserbyEmail, checkPassword, loginUser};
