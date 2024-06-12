@@ -79,6 +79,8 @@ async function getContextResponse(req, res){
 
     const ctxMsg = context.data.items.map((item) => item.text).join("\n\n");
 
+    console.log("Contexto: ", ctxMsg);
+
     const genAi = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAi.getGenerativeModel({model: 'gemini-1.5-flash'});
 
