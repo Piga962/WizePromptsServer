@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Storage } = require('@google-cloud/storage');
-const {GoogleGenerativeAI} = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path = require('path');
 
 async function initializeNearbyyClient() {
@@ -53,7 +53,7 @@ const handleFileUpload = async (req, res) => {
 
     if (success) {
       console.log("Files uploaded successfully:", data);
-      res.send(fileUrl);
+      res.send({ fileUrl }); // Ensure the URL is sent in an object
     } else {
       console.error("Error uploading file:", error);
       res.status(500).send(`Error uploading file: ${error}`);
@@ -64,8 +64,8 @@ const handleFileUpload = async (req, res) => {
   }
 };
 
-async function getContextResponse(req, res){
-    const {message} = req.query;
+async function getContextResponse(req, res) {
+    const {message, pastMessages,pastAnswers, documents} = req.query;
 
     const nearbyy = await nearbyyPromise;
     const context = await nearbyy.semanticSearch({
@@ -73,22 +73,44 @@ async function getContextResponse(req, res){
         query: message,
     });
 
-    if(!context.success){
-        console.error("Xd",context.error);
+    const context2 = await nearbyy.semanticSearch({
+      limit: 3,
+      query: pastMessages,
+    });
+
+    const context3 = await nearbyy.semanticSearch({
+      limit: 3,
+      query: pastAnswers,
+    });
+  
+    const context4 = await nearbyy.semanticSearch({
+      limit: 3,
+      query: documents,
+    });
+  
+    if (!context.success) {
+        console.error("Error:", context.error);
         return res.send("I'm sorry, I don't understand.");	
     }
 
-    const ctxMsg = context.data.items.map((item) => item.text).join("\n\n");
+    console.log(documents);
 
+    const ctxMsg = context.data.items.map((item) => item.text).join("\n\n");
+    const ctxMsg2 = context2.data.items.map((item) => item.text).join("\n\n");
+    const ctxMsg3 = context3.data.items.map((item) => item.text).join("\n\n");
+    const ctxMsg4 = context4.data.items.map((item) => item.text).join("\n\n");
+
+    const combinedContext = `${ctxMsg}\n\nPAST MESSAGES:\n${ctxMsg2}\n\nPAST ANSWERS:\n${ctxMsg3}\n\nDOCUMENTS:\n${ctxMsg4}`;
+    console.log(combinedContext);
     const genAi = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const model = genAi.getGenerativeModel({model: 'gemini-1.5-flash'});
+    const model = genAi.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     try {
         const chat = model.startChat({
           history: [
             {
               role: 'user',
-              parts: [{ text: "RELEVANT CONTEXT TO THE USER'S QUERY:\n " + ctxMsg}],
+              parts: [{ text: "RELEVANT CONTEXT TO THE USER'S QUERY, THIS IS THE MAIN CONTEXT YOU NEED TO ANSWER TO:\n " + ctxMsg + "ADIITIONAL CONTEXT PAST MESSAGES OR PROMPTS:\n" + ctxMsg2 + "PAST ANSWERS:\n" + ctxMsg3 + "DOCUMENTS:\n" + ctxMsg4}],
             },
             {
               role: 'model',
@@ -105,11 +127,9 @@ async function getContextResponse(req, res){
         const text = response.text();
         return res.json({ response: text });
       } catch (error) {
-        console.error('Error en la comunicacion con la api', error);
+        console.error('Error en la comunicación con la API', error);
         res.status(500).send(error);
       }
 }
 
-
-module.exports = {handleFileUpload, getContextResponse};
-
+module.exports = { handleFileUpload, getContextResponse };
