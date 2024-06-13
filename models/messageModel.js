@@ -12,7 +12,6 @@ const getAllMessagesByConversation = async(id) =>{
 }
 
 const createMessage = async(message) => {
-    console.log(message);
     try{
         const query = 'INSERT INTO messages (user_id, message, answer, file_id, conversation_id) VALUES ($1,$2,$3,$4,$5) RETURNING *;';
         const {rows} = await db.query(query, [message.user_id, message.message, message.answer, message.file_id, message.conversation_id]);

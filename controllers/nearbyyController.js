@@ -37,6 +37,7 @@ const handleFileUpload = async (req, res) => {
   const filePath = path.resolve(req.file.path);
   const destination = req.file.filename;
   const nearbyy = await nearbyyPromise;
+  console.log("Uploading file to GCS:", filePath);
 
   try {
     await storage.bucket(bucketName).upload(filePath, {
