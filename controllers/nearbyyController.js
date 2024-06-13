@@ -53,7 +53,7 @@ const handleFileUpload = async (req, res) => {
 
     if (success) {
       console.log("Files uploaded successfully:", data);
-      res.send("File uploaded and processed successfully.");
+      res.send(fileUrl);
     } else {
       console.error("Error uploading file:", error);
       res.status(500).send(`Error uploading file: ${error}`);
@@ -79,8 +79,6 @@ async function getContextResponse(req, res){
     }
 
     const ctxMsg = context.data.items.map((item) => item.text).join("\n\n");
-
-    console.log("Contexto: ", ctxMsg);
 
     const genAi = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     const model = genAi.getGenerativeModel({model: 'gemini-1.5-flash'});
